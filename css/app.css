@@ -221,6 +221,25 @@ button {
 .offline-status .error-text { color: var(--red); }
 .offline-actions { display: grid; gap: 8px; }
 .offline-actions:empty { display: none; }
+.offline-status .offline-actions .btn {
+  min-height: 44px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tint);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: opacity 0.15s;
+}
+.offline-status .offline-actions .btn:not([disabled]):active {
+  opacity: 0.5;
+  transform: none;
+}
+.offline-status .offline-actions .btn[disabled] {
+  color: var(--label-3);
+  opacity: 1;
+  cursor: default;
+}
 .pending-label { color: var(--orange); font-weight: 600; }
 
 /* ---------- Layout principal ---------- */
