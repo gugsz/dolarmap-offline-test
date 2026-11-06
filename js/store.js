@@ -1,8 +1,8 @@
 // Camada de dados. Mesma interface para os dois modos:
 //  - CloudStore: Supabase (login real, dados sincronizados entre os dois celulares)
 //  - LocalStore: localStorage (modo de teste, sem senha, dados só neste aparelho)
-import { SupabaseRest, ApiError } from './supabase.js?v=20261106offline1';
-import { OfflineStore } from './offline-store.js?v=20261106offline1';
+import { SupabaseRest, ApiError } from './supabase.js?v=20261106offline2';
+import { OfflineStore } from './offline-store.js?v=20261106offline2';
 
 const FIELDS = ['kind', 'amount_cents', 'currency', 'brl_cents', 'category', 'note', 'occurred_on'];
 const pick = (v) => Object.fromEntries(FIELDS.map((k) => [k, v[k] ?? null]));

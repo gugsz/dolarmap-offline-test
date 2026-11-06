@@ -1,5 +1,5 @@
 // Cálculos da aba Análises (funções puras, testadas em tests/logic.spec.js).
-import { summarize, todayISO, rateOf, categoryInfo, sortTxs } from './logic.js?v=20261106offline1';
+import { summarize, todayISO, rateOf, categoryInfo, sortTxs } from './logic.js?v=20261106offline2';
 
 const DAY = 86400000;
 

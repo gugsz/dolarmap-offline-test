@@ -1,5 +1,5 @@
 // Somente arquivos da interface entram neste cache; respostas autenticadas nunca entram.
-const VERSION = '20261106offline1';
+const VERSION = '20261106offline2';
 const PREFIX = `dolarmap-offline-shell:${self.registration.scope}:`;
 const CACHE = PREFIX + VERSION;
 const base = self.registration.scope;

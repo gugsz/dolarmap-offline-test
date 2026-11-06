@@ -222,7 +222,6 @@ button {
 .offline-actions { display: grid; gap: 8px; }
 .offline-actions:empty { display: none; }
 .pending-label { color: var(--orange); font-weight: 600; }
-.login + .offline-status { max-width: 420px; margin: 0 auto 32px; }
 
 /* ---------- Layout principal ---------- */
 

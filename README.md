@@ -20,7 +20,7 @@ Edição e exclusão de registros já sincronizados, envio de cartinhas e mudan�
 2. Envie o **conteúdo** desta pasta: `index.html`, `sw.js`, `desativar-offline.html`, `manifest.webmanifest`, `vercel.json`, `css/`, `js/` e `icons/`. O `index.html` deve ficar na raiz. O Supabase já está configurado na cópia.
 3. Importe na Vercel com **Framework: Other**, sem comando de build e sem diretório de saída personalizado.
 4. Abra o novo endereço **HTTPS** no Safari e adicione à Tela de Início como **DolarMap Offline**.
-5. **Abra pelo novo ícone com internet**, entre na conta e aguarde **Aplicativo preparado para abrir sem internet** e uma **Última atualização** concluída.
+5. **Abra pelo novo ícone com internet**, entre na conta e vá a **Ajustes → Sincronização**, logo abaixo de **Conquistas**. Aguarde **Aplicativo preparado para abrir sem internet** e uma **Última atualização** concluída.
 
 Esta cópia usa o MESMO Supabase do app atual. Os gastos que você fizer nesse teste são reais e podem aparecer no app original depois de enviados. Os testes automáticos usam somente dados simulados.
 

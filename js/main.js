@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261106offline1';
-import { createStore } from './store.js?v=20261106offline1';
-import { prepareOffline } from './offline.js?v=20261106offline1';
+import { CONFIG } from './config.js?v=20261106offline2';
+import { createStore } from './store.js?v=20261106offline2';
+import { prepareOffline } from './offline.js?v=20261106offline2';
 import {
   KINDS,
   BUY_CATEGORY,
@@ -19,9 +19,9 @@ import {
   toCSV,
   todayISO,
   validateDraft,
-} from './logic.js?v=20261106offline1';
-import { balanceSeries, categoryBreakdown, coupleComparison, purchaseHistory } from './analytics.js?v=20261106offline1';
-import { COUPLE_STEP, PERSONAL_STEP, achievementsFor, newAchievements, nextMilestone, topPerType } from './achievements.js?v=20261106offline1';
+} from './logic.js?v=20261106offline2';
+import { balanceSeries, categoryBreakdown, coupleComparison, purchaseHistory } from './analytics.js?v=20261106offline2';
+import { COUPLE_STEP, PERSONAL_STEP, achievementsFor, newAchievements, nextMilestone, topPerType } from './achievements.js?v=20261106offline2';
 
 // ---------------------------------------------------------------- estado
 
@@ -499,13 +499,13 @@ function render() {
   const enter = state.enter;
   state.enter = false;
   if (!state.user) {
-    app.innerHTML = renderLogin(enter) + offlinePanel();
+    app.innerHTML = renderLogin(enter);
     return;
   }
   const y = window.scrollY;
   const tabs = { home: renderHome, list: renderList, analytics: renderAnalytics, settings: renderSettings };
   app.innerHTML = `
-    <main class="screen${enter ? ' enter' : ''}" id="main">${offlinePanel()}${tabs[state.tab]()}</main>
+    <main class="screen${enter ? ' enter' : ''}" id="main">${tabs[state.tab]()}</main>
     <nav class="tabbar${enter ? ' enter' : ''}" aria-label="Navegação">
       <div class="tabbar-inner">
         ${tabButton('home', 'Resumo')}
@@ -1156,6 +1156,7 @@ function renderSettings() {
     }
 
     ${achievementsSection()}
+    ${state.store.status ? `<h2 class="section-title">Sincronização</h2>${offlinePanel()}` : ''}
 
     <h2 class="section-title">Aparência</h2>
     <div class="segmented" role="radiogroup" aria-label="Tema">

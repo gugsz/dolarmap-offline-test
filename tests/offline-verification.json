@@ -6,6 +6,22 @@
     },
     {
       "ok": true,
+      "label": "painel de sincronização ausente na aba home"
+    },
+    {
+      "ok": true,
+      "label": "painel de sincronização ausente na aba list"
+    },
+    {
+      "ok": true,
+      "label": "painel de sincronização ausente na aba analytics"
+    },
+    {
+      "ok": true,
+      "label": "sincronização aparece em Ajustes imediatamente abaixo de Conquistas"
+    },
+    {
+      "ok": true,
       "label": "login online, cópia dos dados e preparação do service worker"
     },
     {
