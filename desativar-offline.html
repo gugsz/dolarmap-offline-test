@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desativar DolarMap Offline</title>
+<style>
+body { max-width: 540px; margin: 48px auto; padding: 0 20px; font: 17px/1.6 system-ui; }
+button { padding: 14px 20px; font: inherit; cursor: pointer; }
+</style>
+<h1>Desativar abertura offline</h1>
+<p>Primeiro sincronize seus registros pendentes. Esta página remove os arquivos guardados da interface e o service worker desta instalação, para facilitar a volta à versão anterior.</p>
+<p>Os registros do Supabase e as pendências no banco local serão preservados.</p>
+<button id="disable">Desativar e voltar ao aplicativo</button>
+<p id="status" role="status"></p>
+<script>
+document.getElementById('disable').onclick = async () => {
+  const button = document.getElementById('disable');
+  button.disabled = true;
+  const scope = new URL('./', location.href).href;
+  try {
+    for (const registration of await navigator.serviceWorker.getRegistrations()) {
+      if (registration.scope === scope) await registration.unregister();
+    }
+    for (const key of await caches.keys()) {
+      if (key.startsWith(`dolarmap-offline-shell:${scope}:`)) await caches.delete(key);
+    }
+    location.replace(new URL('./?offline-desativado=1', scope));
+  } catch (error) {
+    document.getElementById('status').textContent = error.message;
+    button.disabled = false;
+  }
+};
+</script>
+</html>

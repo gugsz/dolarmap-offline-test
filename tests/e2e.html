@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>DolarMap — e2e (modo local)</title>
+    <style>iframe{width:390px;height:844px;border:0}</style>
+  </head>
+  <body>
+    <pre id="log">rodando…</pre>
+    <script type="module">
+      // Fluxo completo pela interface real (modo local): login -> gasto -> compra -> editar -> apagar -> sair.
+      localStorage.clear();
+      sessionStorage.setItem('dolarmap.dev.local', '1');
+      const log = [];
+      const step = (ok, msg) => log.push(`${ok ? 'PASS' : 'FAIL'} ${msg}`);
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      // Espera algo aparecer (leitura de arquivo é assíncrona de verdade, não só timer).
+      const waitFor = async (fn, ms = 5000) => { for (let t = 0; t < ms && !fn(); t += 50) await wait(50); return fn(); };
+      const f = document.createElement('iframe');
+      f.src = '../index.html';
+      document.body.appendChild(f);
+      await new Promise((r) => (f.onload = r));
+      await wait(300);
+      const w = f.contentWindow;
+      w.confirm = () => true;
+      const appErrors = [];
+      w.addEventListener('error', (e) => appErrors.push(e.message));
+      w.addEventListener('unhandledrejection', (e) => appErrors.push(String(e.reason?.stack || e.reason)));
+      const $ = (s) => w.document.querySelector(s);
+      const text = () => w.document.body.innerText;
+      const type = (sel, v) => { const el = $(sel); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+      const data = () => JSON.parse(localStorage.getItem('dolarmap.local.data.v1') || '[]');
+
+      try {
+        step(!!$('#login-form'), 'tela de login aparece');
+        step($('.login .btn').disabled, 'botão Entrar desabilitado até escolher pessoa');
+        $('[data-user="manuela"]').click();
+        $('.login .btn').click();
+        await wait(300);
+        step(text().includes('Olá, Manuela'), 'login como Manuela');
+        step(text().includes('Vamos começar?'), 'estado vazio exibido');
+
+        // Gasto rápido: 6,70 biscoito
+        $('.tab-add').click();
+        await wait(100);
+        step(w.document.activeElement?.id === 'amount', 'campo de valor recebe foco ao abrir');
+        type('#amount', '6,70');
+        type('#note', 'Biscoito');
+        $('[data-cat="alimentacao"]').click();
+        $('.sheet form').requestSubmit();
+        await wait(300);
+        step(data().length === 1 && data()[0].amount_cents === 670 && data()[0].author === 'manuela', 'gasto de US$ 6,70 salvo');
+        step(!$('dialog.sheet').open, 'sheet fecha após salvar');
+        step(/Gasto de US\$\s6,70 salvo/.test($('#toast').textContent), 'toast de sucesso');
+
+        // Compra de dólar
+        $('.tab-add').click();
+        await wait(100);
+        $('[data-action="kind"][data-kind="buy"]').click();
+        type('#amount', '1.000');
+        type('#brl', '5.450,00');
+        step($('#rate-hint').textContent.includes('5,45'), 'cotação calculada ao vivo (R$ 5,45)');
+        $('.sheet form').requestSubmit();
+        await wait(300);
+        step(/US\$\s993,30/.test($('.hero .value').textContent), 'saldo = 1000 - 6,70 = US$ 993,30');
+
+        // Conquista: saldo passou de US$ 500 -> comemoração em tela cheia
+        await wait(700);
+        step(!!$('.celebrate') && /Você atingiu/.test($('.celebrate').innerText) && /US\$\s500/.test($('.celebrate').textContent), 'conquista "Você atingiu US$ 500" aparece');
+        $('.celebrate [data-cel="ok"]').click();
+        await wait(400);
+        // segunda da fila: primeira compra de dólar
+        step(!!$('.celebrate') && /Primeira compra/.test($('.celebrate').textContent), 'conquista "Primeira compra de dólar" em seguida');
+        $('.celebrate [data-cel="ok"]').click();
+        await wait(400);
+        step(!$('.celebrate'), 'comemoração fecha no "Bora!"');
+
+        // Validação
+        $('.tab-add').click();
+        await wait(100);
+        type('#amount', '0');
+        $('.sheet form').requestSubmit();
+        await wait(100);
+        step($('#amount-err').textContent.includes('maior que zero'), 'erro de validação para valor zero');
+        step($('dialog.sheet').open && data().length === 2, 'nada salvo com erro');
+        $('[data-action="close"]').click();
+
+        // Editar
+        $('[data-action="tab"][data-tab="list"]').click();
+        await wait(100);
+        const row = [...w.document.querySelectorAll('[data-action="edit"]')].find((b) => b.innerText.includes('Biscoito'));
+        row.click();
+        await wait(100);
+        type('#amount', '7,25');
+        $('.sheet form').requestSubmit();
+        await wait(300);
+        step(data().find((t) => t.note === 'Biscoito').amount_cents === 725, 'edição salva (US$ 7,25)');
+
+        // Busca
+        $('#search').focus();
+        type('#search', 'bisc');
+        await wait(300);
+        step(w.document.querySelectorAll('#list-body [data-action="edit"]').length === 1, 'busca filtra a lista');
+        step(w.document.activeElement?.id === 'search', 'campo de busca mantém o foco');
+        type('#search', '');
+        await wait(300);
+
+        // Apagar
+        [...w.document.querySelectorAll('[data-action="edit"]')].find((b) => b.innerText.includes('Biscoito')).click();
+        await wait(100);
+        $('[data-action="delete"]').click();
+        await wait(300);
+        step(data().length === 1, 'registro apagado');
+
+        // Registro de outra pessoa é somente leitura
+        $('[data-action="tab"][data-tab="settings"]').click();
+        $('[data-action="logout"]').click();
+        await wait(200);
+        $('[data-user="gustavo"]').click();
+        $('.login .btn').click();
+        await wait(300);
+        $('[data-scope="couple"]').click();
+        $('[data-action="edit"]').click();
+        await wait(100);
+        step(text().includes('só Manuela pode editar') && $('#amount').disabled, 'registro da Manuela é só leitura para o Gustavo');
+        $('[data-action="close"]').click();
+
+        // Tema
+        $('[data-action="tab"][data-tab="settings"]').click();
+        $('[data-action="theme"][data-theme="dark"]').click();
+        step(w.document.documentElement.dataset.theme === 'dark', 'tema escuro aplicado');
+
+        // Foto de perfil: Gustavo escolhe uma imagem 600×400 (metade esquerda vermelha, direita azul),
+        // ajusta no editor (arrasta para a direita) e salva -> quadrado 320×320 com mais vermelho.
+        {
+          const cv = document.createElement('canvas');
+          cv.width = 600; cv.height = 400;
+          const cx = cv.getContext('2d');
+          cx.fillStyle = '#ff0000'; cx.fillRect(0, 0, 300, 400);
+          cx.fillStyle = '#0000ff'; cx.fillRect(300, 0, 300, 400);
+          const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
+          const dt = new w.DataTransfer();
+          dt.items.add(new w.File([blob], 'eu.png', { type: 'image/png' }));
+          const inp = $('#photo-input');
+          inp.files = dt.files;
+          inp.dispatchEvent(new w.Event('change', { bubbles: true }));
+          await waitFor(() => $('.cropper .crop-stage img'));
+          await wait(300);
+          step(!!$('.cropper .crop-stage img'), 'editor "Ajustar foto" abre após escolher a imagem');
+          const st = $('.crop-stage');
+          const r = st.getBoundingClientRect();
+          const pe = (type, x) => st.dispatchEvent(new w.PointerEvent(type, { bubbles: true, pointerId: 7, clientX: r.left + x, clientY: r.top + 50 }));
+          pe('pointerdown', 20); pe('pointermove', 120); pe('pointermove', 400); pe('pointerup', 400);
+          $('.cropper .crop-ok').click();
+          await waitFor(() => $('.profile-row .avatar img'));
+          await wait(300);
+          const img = $('.profile-row .avatar img');
+          const probe = img && (await new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.src = img.src; }));
+          let px = [];
+          if (probe) { const c2 = document.createElement('canvas'); c2.width = c2.height = 320; const g = c2.getContext('2d'); g.drawImage(probe, 0, 0); px = [...g.getImageData(200, 160, 1, 1).data]; }
+          step(!!img && img.src.startsWith('data:image/jpeg') && probe.naturalWidth === 320 && probe.naturalHeight === 320, 'foto de perfil salva (320×320)');
+          step(px[0] > 200 && px[2] < 60, `recorte respeita o ajuste (arrastou: ponto que seria azul ficou vermelho) [rgb ${px.slice(0, 3)}]`);
+          step(!!$('.couple-person[data-user="gustavo"] img') && /Foto atualizada/.test($('#toast').textContent), 'foto aparece em "Nós dois"');
+        }
+
+        // Cartinha secreta: Gustavo escreve, abre na tela dele (modo teste) e chega para a Manuela
+        $('[data-action="secret"]').click();
+        await wait(150);
+        step(!!$('dialog.love-sheet')?.open, 'tela secreta abre ao tocar em "DolarMap 1.0"');
+        type('#love-msg', 'Te amo! ❤️\nBoa viagem');
+        $('dialog.love-sheet form').requestSubmit();
+        await wait(1200);
+        step(!$('.letter') && !$('dialog.love-sheet').open, 'enviada: não abre na tela de quem enviou');
+        $('[data-action="logout"]').click();
+        await wait(200);
+        $('[data-user="manuela"]').click();
+        $('.login .btn').click();
+        await wait(1500);
+        step(!!$('.letter') && /Gustavo/.test($('.letter .letter-hint').textContent), 'Manuela recebe a cartinha ao entrar');
+        $('.letter [data-letter="open"]').click();
+        await wait(1700);
+        step($('.letter').classList.contains('reading') && $('.letter .lc-msg').textContent.includes('Te amo') && /Com carinho, Gustavo/.test($('.letter .lc-from').textContent), 'envelope abre e mostra a mensagem "Com carinho"');
+        $('.letter [data-letter="close"]').click();
+        await wait(600);
+        const notes = JSON.parse(localStorage.getItem('dolarmap.local.notes.v1') || '[]');
+        step(notes.length === 1 && !!notes[0].opened_at && !$('.letter'), 'cartinha marcada como aberta e não reaparece');
+
+        // Manuela também tem a função: responde para o Gustavo
+        $('[data-action="tab"][data-tab="settings"]').click();
+        $('[data-action="secret"]').click();
+        await wait(150);
+        step(/Gustavo/.test($('#love-title').closest('form').textContent), 'Manuela abre a tela secreta (destino: Gustavo)');
+        step(!!$('.couple-person[data-user="gustavo"] img') && !$('.couple-person[data-user="manuela"] img'), 'Manuela vê a foto do Gustavo em "Nós dois"');
+        type('#love-msg', 'Também te amo!');
+        $('dialog.love-sheet form').requestSubmit();
+        await wait(800);
+        $('[data-action="logout"]').click();
+        await wait(200);
+        $('[data-user="gustavo"]').click();
+        $('.login .btn').click();
+        await wait(1500);
+        step(!!$('.letter') && /Manuela/.test($('.letter .letter-hint').textContent) && !$('.celebrate'),
+          'Gustavo recebe a resposta da Manuela (sem comemoração da Manuela "vazando" após trocar de conta)');
+      } catch (e) {
+        step(false, 'exceção: ' + e.message);
+      }
+      step(!appErrors.length, 'nenhum erro de JavaScript no app' + (appErrors.length ? `: ${appErrors.join(' | ')}` : ''));
+      const failed = log.filter((l) => l.startsWith('FAIL')).length;
+      document.getElementById('log').textContent = log.join('\n') + `\n\n${failed ? 'E2E FAILED' : 'E2E PASSED'} (${log.length - failed}/${log.length})`;
+    </script>
+  </body>
+</html>

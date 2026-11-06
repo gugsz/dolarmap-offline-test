@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>DolarMap Offline</title>
+    <meta name="description" content="Controle dos dólares da viagem de Work and Travel." />
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Tela de Início do iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="DolarMap Offline" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <script>
+      // Aplica o tema salvo antes de pintar a tela (evita "piscar").
+      try {
+        var t = localStorage.getItem('dolarmap.theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="css/app.css?v=20261106offline1" />
+    <script type="module" src="js/main.js?v=20261106offline1"></script>
+  </head>
+  <body>
+    <div id="app" aria-live="polite">
+      <div class="splash" role="status">
+        <div class="spinner" aria-hidden="true"></div>
+        <span class="sr-only">Carregando…</span>
+      </div>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <noscript>O DolarMap precisa de JavaScript ativado.</noscript>
+  </body>
+</html>

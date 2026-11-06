@@ -1,0 +1,79 @@
+{
+  "checks": [
+    {
+      "ok": true,
+      "label": "OK: 56/56 testes passaram"
+    },
+    {
+      "ok": true,
+      "label": "login online, cópia dos dados e preparação do service worker"
+    },
+    {
+      "ok": true,
+      "label": "service worker ativo"
+    },
+    {
+      "ok": true,
+      "label": "reabre a interface em modo avião com sessão expirada"
+    },
+    {
+      "ok": true,
+      "label": "saldo e extrato usam a cópia local sem conexão"
+    },
+    {
+      "ok": true,
+      "label": "gasto offline não chama o servidor"
+    },
+    {
+      "ok": true,
+      "label": "gasto persiste depois de fechar/reabrir e aparece como pendente"
+    },
+    {
+      "ok": true,
+      "label": "uma nova janela abre totalmente offline com os dados preservados"
+    },
+    {
+      "ok": true,
+      "label": "reconectar envia uma única vez ao Supabase simulado"
+    },
+    {
+      "ok": true,
+      "label": "nova sincronização mantém o gasto sem duplicar"
+    },
+    {
+      "ok": true,
+      "label": "cache do service worker contém a interface e nenhuma resposta autenticada"
+    },
+    {
+      "ok": true,
+      "label": "interface sem erros JavaScript: "
+    },
+    {
+      "ok": true,
+      "label": "publicar a versão anterior no mesmo endereço carrega a interface original"
+    },
+    {
+      "ok": true,
+      "label": "página de desativação redireciona sem apagar lançamentos"
+    },
+    {
+      "ok": true,
+      "label": "desativação remove o service worker e impede novo registro nessa abertura"
+    },
+    {
+      "ok": true,
+      "label": "desativação remove somente o cache da interface offline"
+    },
+    {
+      "ok": true,
+      "label": "pasta original preservada: DolarMap"
+    },
+    {
+      "ok": true,
+      "label": "pasta original preservada: DolarMap-publicar"
+    }
+  ],
+  "unit_tests": "OK: 56/56 testes passaram",
+  "real_supabase_accessed": false,
+  "ok": true
+}

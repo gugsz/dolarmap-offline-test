@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DolarMap — preview (dev)</title>
+    <style>html,body,iframe{margin:0;border:0;width:100%;height:100%;display:block}</style>
+  </head>
+  <body>
+    <script>
+      // Ferramenta de desenvolvimento: injeta DADOS DE EXEMPLO no modo local e abre o app num iframe.
+      // Parâmetros: ?theme=light|dark&tab=home|list|settings&scope=me|couple&user=gustavo|none&empty=1&action=add|buy|edit|error
+      const p = new URLSearchParams(location.search);
+      const user = p.get('user') || 'gustavo';
+      localStorage.clear();
+      sessionStorage.setItem('dolarmap.dev.local', '1');
+      if (p.get('theme')) localStorage.setItem('dolarmap.theme', p.get('theme'));
+      localStorage.setItem('dolarmap.scope', p.get('scope') || 'me');
+      if (user !== 'none') localStorage.setItem('dolarmap.local.user.v1', user);
+      // ?photos=1 (ou only=gustavo): fotos de perfil de exemplo, desenhadas aqui mesmo
+      if (p.get('photos')) {
+        const fake = (c1, c2, emoji) => {
+          const c = document.createElement('canvas'); c.width = c.height = 320;
+          const x = c.getContext('2d');
+          const g = x.createLinearGradient(0, 0, 320, 320); g.addColorStop(0, c1); g.addColorStop(1, c2);
+          x.fillStyle = g; x.fillRect(0, 0, 320, 320);
+          x.font = '170px serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(emoji, 160, 175);
+          return c.toDataURL('image/jpeg', 0.85);
+        };
+        const pics = { gustavo: fake('#5ac8fa', '#0a5c39', '🏄'), manuela: fake('#ffb3c7', '#bf5af2', '🌸') };
+        if (p.get('photos') !== '1') delete pics[p.get('photos') === 'gustavo' ? 'manuela' : 'gustavo'];
+        localStorage.setItem('dolarmap.local.profiles.v1', JSON.stringify(pics));
+        localStorage.setItem('dolarmap.avatars.v1', JSON.stringify(pics));
+      }
+      // ?ach=1: finge que nada foi comemorado ainda -> abre a comemoração ao carregar
+      if (p.get('ach')) localStorage.setItem('dolarmap.achievements.v1.' + user, '[]');
+      const d = (n) => { const x = new Date(); x.setDate(x.getDate() - n); return x.toISOString().slice(0, 10); };
+      let i = 0;
+      const T = (author, o) => ({ id: 'demo' + i++, user_id: 'local-' + author, author, note: '', brl_cents: null, currency: 'USD', created_at: new Date(Date.now() - i * 1000).toISOString(), ...o });
+      const demo = [
+        T('gustavo', { kind: 'expense', amount_cents: 670, category: 'alimentacao', note: 'Biscoito', occurred_on: d(0) }),
+        T('gustavo', { kind: 'expense', amount_cents: 1299, category: 'mercado', note: 'Mercado Walmart', occurred_on: d(0) }),
+        T('gustavo', { kind: 'expense', amount_cents: 4250, category: 'transporte', note: 'Uber aeroporto', occurred_on: d(4) }),
+        T('gustavo', { kind: 'expense', amount_cents: 8790, category: 'mercado', note: 'Compras da semana', occurred_on: d(8) }),
+        T('gustavo', { kind: 'expense', amount_cents: 2400, category: 'lazer', note: 'Cinema', occurred_on: d(11) }),
+        T('gustavo', { kind: 'expense', amount_cents: 15999, category: 'compras', note: 'Casaco de frio', occurred_on: d(16) }),
+        T('gustavo', { kind: 'income', amount_cents: 62000, category: 'salario', note: 'Primeiro pagamento', occurred_on: d(2) }),
+        T('manuela', { kind: 'buy', amount_cents: 80000, brl_cents: 436000, category: 'cambio', note: 'Wise', occurred_on: d(1) }),
+        T('gustavo', { kind: 'buy', amount_cents: 100000, brl_cents: 541000, category: 'cambio', note: 'Casa de câmbio', occurred_on: d(3) }),
+        T('gustavo', { kind: 'buy', amount_cents: 50000, brl_cents: 274500, category: 'cambio', note: '', occurred_on: d(20) }),
+        T('gustavo', { kind: 'expense', amount_cents: 342000, currency: 'BRL', category: 'passagem', note: 'Passagem GRU → JFK', occurred_on: d(25) }),
+        T('gustavo', { kind: 'expense', amount_cents: 100000, currency: 'BRL', category: 'visto', note: 'Taxa do visto J-1', occurred_on: d(40) }),
+        T('gustavo', { kind: 'expense', amount_cents: 25785, currency: 'BRL', category: 'passaporte', note: 'Passaporte', occurred_on: d(60) }),
+        T('manuela', { kind: 'expense', amount_cents: 100000, currency: 'BRL', category: 'visto', note: 'Taxa do visto J-1', occurred_on: d(40) }),
+      ];
+      localStorage.setItem('dolarmap.local.data.v1', JSON.stringify(p.get('empty') ? [] : demo));
+
+      const f = document.createElement('iframe');
+      f.src = '../index.html';
+      if (p.get('w')) f.style.width = p.get('w') + 'px';
+      if (p.get('h')) f.style.height = p.get('h') + 'px'; // simula a área visível acima do teclado
+      document.body.appendChild(f);
+      f.onload = () => setTimeout(() => {
+        const doc = f.contentDocument;
+        const click = (sel) => doc.querySelector(sel)?.click();
+        const tab = p.get('tab');
+        if (tab) click(`[data-tab="${tab}"]`);
+        const a = p.get('action');
+        if (a === 'add' || a === 'buy') {
+          click(a === 'buy' ? '[data-action="add"]' : '.tab-add');
+          setTimeout(() => {
+            if (a === 'buy') click('[data-kind="buy"]');
+            const set = (sel, v) => { const el = doc.querySelector(sel); if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); } };
+            set('#amount', a === 'buy' ? '300' : '6,70');
+            set('#brl', '1.629,00');
+            set('#note', a === 'buy' ? '' : 'Biscoito');
+          }, 100);
+        }
+        if (a === 'error') {
+          click('.tab-add');
+          setTimeout(() => { doc.querySelector('#amount').value = 'abc'; click('.sheet-actions .btn'); }, 100);
+        }
+        if (a === 'edit') click('[data-action="edit"]');
+        if (a === 'pick') click('[data-user="gustavo"]');
+        if (a === 'crop') {
+          click('[data-tab="settings"]');
+          setTimeout(async () => {
+            const c = document.createElement('canvas'); c.width = 900; c.height = 600;
+            const x = c.getContext('2d');
+            const g = x.createLinearGradient(0, 0, 900, 600); g.addColorStop(0, '#87ceeb'); g.addColorStop(1, '#f4a460');
+            x.fillStyle = g; x.fillRect(0, 0, 900, 600);
+            x.font = '260px serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('🧑‍🦱', 690, 330);
+            const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+            const dt = new f.contentWindow.DataTransfer();
+            dt.items.add(new f.contentWindow.File([blob], 'foto.png', { type: 'image/png' }));
+            const inp = doc.querySelector('#photo-input'); inp.files = dt.files;
+            inp.dispatchEvent(new Event('change', { bubbles: true }));
+          }, 50);
+        }
+        if (a === 'secret') { click('[data-tab="settings"]'); setTimeout(() => click('[data-action="secret"]'), 50); }
+        if (a === 'letter' || a === 'letter-open') {
+          click('[data-tab="settings"]');
+          setTimeout(() => {
+            click('[data-action="secret"]');
+            const ta = doc.querySelector('#love-msg');
+            ta.value = 'Oi, amor! ❤️\nSó passando pra lembrar que essa viagem vai ser a melhor das nossas vidas.\nTe amo muito!';
+            ta.dispatchEvent(new Event('input', { bubbles: true }));
+            doc.querySelector('dialog.love-sheet form').requestSubmit();
+            if (a === 'letter-open') setTimeout(() => click('.letter [data-letter="open"]'), 1200);
+          }, 50);
+        }
+        if (a === 'chart') {
+          const el = doc.querySelector(`[data-chart="${p.get('chart') || 'balance'}"] svg`);
+          const r = el.getBoundingClientRect();
+          el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: r.left + r.width * 0.62, clientY: r.top + 40 }));
+          const sec = doc.querySelector(`[data-chart="${p.get('chart') || 'balance'}"]`).closest('section');
+          f.contentWindow.scrollTo(0, sec.offsetTop - 60);
+        }
+        if (p.get('sheetEnd')) setTimeout(() => { const b = doc.querySelector('.sheet-body'); if (b) b.scrollTop = b.scrollHeight; }, 900);
+        if (p.get('scrollTo')) { const s = doc.querySelector(p.get('scrollTo')); if (s) f.contentWindow.scrollTo(0, s.offsetTop - 60); }
+      }, 300);
+    </script>
+  </body>
+</html>

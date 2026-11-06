@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>DolarMap — testes</title>
+    <style>
+      body { font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; padding: 16px; }
+      .ok { color: #248a3d; } .fail { color: #d70015; }
+    </style>
+  </head>
+  <body>
+    <h1 id="summary">Rodando…</h1>
+    <pre id="results"></pre>
+    <script type="module">
+      import { run } from './harness.js';
+      import './logic.spec.js';
+      import './offline.spec.js';
+      const results = await run();
+      const failed = results.filter((r) => !r.ok);
+      document.getElementById('results').innerHTML = results
+        .map((r) => `<span class="${r.ok ? 'ok' : 'fail'}">${r.ok ? 'PASS' : 'FAIL'} ${r.name}${r.ok ? '' : ' — ' + r.error}</span>`)
+        .join('\n');
+      const s = `${results.length - failed.length}/${results.length} testes passaram`;
+      document.getElementById('summary').textContent = failed.length ? `FALHOU: ${s}` : `OK: ${s}`;
+      document.title = failed.length ? 'TESTS FAILED' : 'TESTS PASSED';
+    </script>
+  </body>
+</html>
