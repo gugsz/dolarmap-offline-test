@@ -1,7 +1,7 @@
 // Conquistas: marcos que disparam a comemoração em tela cheia.
 // Funções puras (testáveis); quem guarda o que já foi comemorado é o main.js (localStorage).
 
-import { summarize } from './logic.js?v=20261106offline2';
+import { summarize } from './logic.js?v=20261106offline3';
 
 /** Saldo pessoal comemora a cada US$ 500; o saldo do casal, a cada US$ 1.000 (em centavos). */
 export const PERSONAL_STEP = 50000;

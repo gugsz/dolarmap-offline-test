@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261106offline2';
-import { createStore } from './store.js?v=20261106offline2';
-import { prepareOffline } from './offline.js?v=20261106offline2';
+import { CONFIG } from './config.js?v=20261106offline3';
+import { createStore } from './store.js?v=20261106offline3';
+import { prepareOffline } from './offline.js?v=20261106offline3';
 import {
   KINDS,
   BUY_CATEGORY,
@@ -19,9 +19,9 @@ import {
   toCSV,
   todayISO,
   validateDraft,
-} from './logic.js?v=20261106offline2';
-import { balanceSeries, categoryBreakdown, coupleComparison, purchaseHistory } from './analytics.js?v=20261106offline2';
-import { COUPLE_STEP, PERSONAL_STEP, achievementsFor, newAchievements, nextMilestone, topPerType } from './achievements.js?v=20261106offline2';
+} from './logic.js?v=20261106offline3';
+import { balanceSeries, categoryBreakdown, coupleComparison, purchaseHistory } from './analytics.js?v=20261106offline3';
+import { COUPLE_STEP, PERSONAL_STEP, achievementsFor, newAchievements, nextMilestone, topPerType } from './achievements.js?v=20261106offline3';
 
 // ---------------------------------------------------------------- estado
 
