@@ -212,33 +212,63 @@ button {
   flex: 1;
 }
 
-.offline-status {
-  align-items: flex-start;
-  border: 1px solid var(--separator, #8e8e9340);
+.offline-status .offline-sync-row {
+  min-height: 72px;
+  padding: 14px 16px;
+  gap: 12px;
 }
-.offline-status strong, .offline-status small { display: block; }
-.offline-status small { margin-top: 4px; color: var(--secondary, #737373); line-height: 1.4; }
-.offline-status .error-text { color: var(--red); }
-.offline-actions { display: grid; gap: 8px; }
-.offline-actions:empty { display: none; }
-.offline-status .offline-actions .btn {
-  min-height: 44px;
-  padding: 0 4px;
+.offline-status .offline-sync-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
   border-radius: 8px;
-  background: transparent;
-  color: var(--tint);
-  font-size: 1rem;
-  font-weight: 400;
-  transition: opacity 0.15s;
+  background: var(--tint);
+  color: #fff;
 }
-.offline-status .offline-actions .btn:not([disabled]):active {
-  opacity: 0.5;
-  transform: none;
+.offline-sync-icon svg { width: 23px; height: 23px; }
+.offline-status .offline-sync-row .title,
+.offline-status .offline-sync-row .subtitle {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
-.offline-status .offline-actions .btn[disabled] {
-  color: var(--label-3);
-  opacity: 1;
-  cursor: default;
+.offline-status .offline-sync-row .title { font-weight: 400; }
+.offline-status .offline-sync-row .subtitle { margin-top: 3px; }
+.offline-sync-state {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 22px;
+  color: var(--green);
+}
+.offline-sync-state svg { width: 22px; height: 22px; }
+.offline-sync-state[data-status='offline'] { color: var(--label-2); }
+.offline-sync-state[data-status='pending'] { color: var(--orange); }
+.offline-sync-state[data-status='error'] { color: var(--red); }
+.offline-sync-state .spinner { width: 20px; height: 20px; border-width: 2px; }
+.offline-status .offline-sync-row:disabled { cursor: default; }
+.offline-status .offline-sync-row:disabled:active { background: var(--card); }
+.offline-status .offline-sync-row:disabled:not([aria-busy='true']) .title {
+  color: var(--label-2);
+}
+.offline-status .offline-sync-row:disabled:not([aria-busy='true']) .offline-sync-icon {
+  background: var(--fill-2);
+  color: var(--label-2);
+}
+.offline-status .row:focus-visible { outline-offset: -3px; }
+.offline-caption {
+  margin: 8px 32px 0;
+  color: var(--label-2);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.offline-caption span { display: block; }
+.offline-caption .error-text { margin-top: 4px; color: var(--red); }
+@media (prefers-reduced-motion: reduce) {
+  .offline-sync-state .spinner { animation: none; }
 }
 .pending-label { color: var(--orange); font-weight: 600; }
 

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261106offline3';
-import { createStore } from './store.js?v=20261106offline3';
-import { prepareOffline } from './offline.js?v=20261106offline3';
+import { CONFIG } from './config.js?v=20261106offline4';
+import { createStore } from './store.js?v=20261106offline4';
+import { prepareOffline } from './offline.js?v=20261106offline4';
 import {
   KINDS,
   BUY_CATEGORY,
@@ -19,9 +19,9 @@ import {
   toCSV,
   todayISO,
   validateDraft,
-} from './logic.js?v=20261106offline3';
-import { balanceSeries, categoryBreakdown, coupleComparison, purchaseHistory } from './analytics.js?v=20261106offline3';
-import { COUPLE_STEP, PERSONAL_STEP, achievementsFor, newAchievements, nextMilestone, topPerType } from './achievements.js?v=20261106offline3';
+} from './logic.js?v=20261106offline4';
+import { balanceSeries, categoryBreakdown, coupleComparison, purchaseHistory } from './analytics.js?v=20261106offline4';
+import { COUPLE_STEP, PERSONAL_STEP, achievementsFor, newAchievements, nextMilestone, topPerType } from './achievements.js?v=20261106offline4';
 
 // ---------------------------------------------------------------- estado
 
@@ -463,22 +463,41 @@ function offlinePanelContents() {
     : 'Ainda não foi baixada uma cópia completa dos registros.';
   if (offline || status.pending) detail += ' O outro celular recebe seus lançamentos depois da sincronização.';
   if (!state.user) { title = 'Versão de teste offline'; detail = 'Entre com internet uma vez para guardar seus dados neste aparelho.'; }
-  const assets = offlineAssets === 'ready' ? '✓ Aplicativo preparado para abrir sem internet.'
+  const assets = offlineAssets === 'ready' ? 'Aplicativo preparado para abrir sem internet.'
     : offlineAssets === 'preparing' ? 'Preparando a abertura sem internet…'
     : offlineAssets === 'disabled' ? 'Abertura offline desativada. Você pode publicar a versão anterior agora.'
     : `Abertura offline ainda não preparada. ${offlineAssetError}`;
-  return `<div class="grow"><strong>${esc(title)}</strong><small>${esc(detail)}</small>
-    <small data-offline-assets="${esc(offlineAssets)}">${esc(assets)}</small>
-    ${status.error && state.user ? `<small class="error-text">${esc(status.error)}</small>` : ''}</div>
-    <div class="offline-actions">
-      ${state.user ? `<button type="button" class="btn small" data-action="sync" ${navigator.onLine === false || status.syncing ? 'disabled' : ''}>Sincronizar</button>` : ''}
-      ${offlineAssets === 'failed' ? '<button type="button" class="btn small" data-action="prepare-offline">Preparar offline</button>' : ''}
-    </div>`;
+  const indicator = status.syncing ? 'syncing' : status.pending ? 'pending' : offline ? 'offline' : status.error ? 'error' : 'ready';
+  const indicatorPath = indicator === 'ready'
+    ? '<circle cx="12" cy="12" r="8.5"/><path d="m8 12 2.5 2.5L16 9"/>'
+    : indicator === 'offline'
+      ? '<circle cx="12" cy="12" r="8.5"/><path d="m6 18 12-12"/>'
+      : '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/>';
+  return `<div class="group">
+      <button type="button" class="row offline-sync-row" data-action="sync"
+        aria-busy="${status.syncing ? 'true' : 'false'}" aria-describedby="offline-detail offline-assets"
+        ${!state.user || navigator.onLine === false || status.syncing ? 'disabled' : ''}>
+        <span class="offline-sync-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 4v5h-5M4 20v-5h5M5.1 8a7.5 7.5 0 0 1 12.4-2L20 9M4 15l2.5 3A7.5 7.5 0 0 0 18.9 16"/>
+          </svg>
+        </span>
+        <span class="main"><span class="title">${status.syncing ? 'Sincronizando…' : 'Sincronizar agora'}</span><span class="subtitle">${esc(title)}</span></span>
+        <span class="offline-sync-state" data-status="${indicator}" aria-hidden="true">
+          ${status.syncing ? '<span class="spinner"></span>' : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${indicatorPath}</svg>`}
+        </span>
+      </button>
+      ${offlineAssets === 'failed' ? '<button type="button" class="row plain link" data-action="prepare-offline">Preparar offline</button>' : ''}
+    </div>
+    <p class="offline-caption"><span id="offline-detail">${esc(detail)}</span>
+      <span id="offline-assets" data-offline-assets="${esc(offlineAssets)}">${esc(assets)}</span>
+      ${status.error && state.user ? `<span class="error-text">${esc(status.error)}</span>` : ''}
+    </p>`;
 }
 
 function offlinePanel() {
   if (!state.store.status) return '';
-  return `<section id="offline-status" class="banner offline-status" aria-live="polite" aria-label="Conexão e sincronização">${offlinePanelContents()}</section>`;
+  return `<section id="offline-status" class="offline-status" aria-live="polite" aria-label="Conexão e sincronização">${offlinePanelContents()}</section>`;
 }
 
 function updateOfflinePanel() {

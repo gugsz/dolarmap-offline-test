@@ -1,5 +1,5 @@
-import { OfflineDatabase } from './offline-db.js?v=20261106offline3';
-import { ApiError } from './supabase.js?v=20261106offline3';
+import { OfflineDatabase } from './offline-db.js?v=20261106offline4';
+import { ApiError } from './supabase.js?v=20261106offline4';
 
 const FIELDS = ['kind', 'amount_cents', 'currency', 'brl_cents', 'category', 'note', 'occurred_on'];
 const valuesOf = (row) => Object.fromEntries(FIELDS.map((key) => [key, row[key] ?? null]));

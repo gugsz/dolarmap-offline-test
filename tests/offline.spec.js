@@ -1,7 +1,7 @@
 import { test, assert } from './harness.js';
-import { OfflineDatabase } from '../js/offline-db.js?v=20261106offline3';
-import { OfflineStore } from '../js/offline-store.js?v=20261106offline3';
-import { ApiError } from '../js/supabase.js?v=20261106offline3';
+import { OfflineDatabase } from '../js/offline-db.js?v=20261106offline4';
+import { OfflineStore } from '../js/offline-store.js?v=20261106offline4';
+import { ApiError } from '../js/supabase.js?v=20261106offline4';
 
 const user = { id: 'offline-test-u1', username: 'gustavo', name: 'Gustavo' };
 const other = { id: 'offline-test-u2', username: 'manuela', name: 'Manuela' };
